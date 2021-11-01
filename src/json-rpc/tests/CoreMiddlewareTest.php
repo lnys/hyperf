@@ -5,17 +5,17 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace HyperfTest\JsonRpc;
 
 use Hyperf\Config\Config;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Contract\NormalizerInterface;
 use Hyperf\Contract\StdoutLoggerInterface;
+use Hyperf\Di\ClosureDefinitionCollectorInterface;
 use Hyperf\Di\Container;
 use Hyperf\Di\MethodDefinitionCollector;
 use Hyperf\Di\MethodDefinitionCollectorInterface;
@@ -133,10 +133,8 @@ class CoreMiddlewareTest extends TestCase
         $this->assertEquals(200, $response->getStatusCode());
         $ret = json_decode((string) $response->getBody(), true);
         $this->assertArrayHasKey('error', $ret);
-        $this->assertArraySubset([
-            'code' => ResponseBuilder::SERVER_ERROR,
-            'message' => 'Expected non-zero value of divider',
-        ], $ret['error']);
+        $this->assertSame('Expected non-zero value of divider', $ret['error']['message']);
+        $this->assertSame(ResponseBuilder::SERVER_ERROR, $ret['error']['code']);
     }
 
     public function testDefaultExceptionHandler()
@@ -172,10 +170,8 @@ class CoreMiddlewareTest extends TestCase
         $this->assertEquals(200, $response->getStatusCode());
         $ret = json_decode((string) $response->getBody(), true);
         $this->assertArrayHasKey('error', $ret);
-        $this->assertArraySubset([
-            'code' => ResponseBuilder::SERVER_ERROR,
-            'message' => 'Expected non-zero value of divider',
-        ], $ret['error']);
+        $this->assertSame('Expected non-zero value of divider', $ret['error']['message']);
+        $this->assertSame(ResponseBuilder::SERVER_ERROR, $ret['error']['code']);
     }
 
     public function createContainer()
@@ -200,6 +196,10 @@ class CoreMiddlewareTest extends TestCase
             ->andReturn(new SimpleNormalizer());
         $container->shouldReceive('get')->with(MethodDefinitionCollectorInterface::class)
             ->andReturn(new MethodDefinitionCollector());
+        $container->shouldReceive('has')->with(ClosureDefinitionCollectorInterface::class)
+            ->andReturn(false);
+        $container->shouldReceive('get')->with(ClosureDefinitionCollectorInterface::class)
+            ->andReturn(null);
         $container->shouldReceive('get')->with(StdoutLoggerInterface::class)
             ->andReturn(new Logger('App', [new StreamHandler('php://stderr')]));
         $container->shouldReceive('get')->with(EventDispatcherInterface::class)

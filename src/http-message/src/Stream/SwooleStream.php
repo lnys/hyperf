@@ -5,11 +5,10 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace Hyperf\HttpMessage\Stream;
 
 use Psr\Http\Message\StreamInterface;
@@ -79,7 +78,7 @@ class SwooleStream implements StreamInterface
     {
         $this->contents = '';
         $this->size = 0;
-        $this->readable = $this->writable = false;
+        $this->writable = false;
 
         return null;
     }

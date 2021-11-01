@@ -5,11 +5,10 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace HyperfTest\GrpcClient\Stub;
 
 use Grpc\Info;
@@ -20,7 +19,7 @@ class HiClient extends BaseClient
 {
     public function sayHello()
     {
-        return $this->simpleRequest(
+        return $this->_simpleRequest(
             '/grpc.hi/sayHello',
             new Info(),
             [UserReply::class, 'decode']
@@ -29,7 +28,7 @@ class HiClient extends BaseClient
 
     public function sayBug()
     {
-        return $this->simpleRequest(
+        return $this->_simpleRequest(
             '/bug',
             new Info(),
             [UserReply::class, 'decode']

@@ -5,16 +5,14 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace Hyperf\RpcServer\Router;
 
 use FastRoute\DataGenerator;
 use FastRoute\RouteParser;
-use Hyperf\HttpServer\MiddlewareManager;
 use Hyperf\HttpServer\Router\Handler;
 
 class RouteCollector
@@ -54,18 +52,14 @@ class RouteCollector
      *
      * The syntax used in the $route string depends on the used route parser.
      *
-     * @param string|string[] $httpMethod
      * @param mixed $handler
      */
     public function addRoute(string $route, $handler, array $options = [])
     {
         $route = $this->currentGroupPrefix . $route;
         $routeDatas = $this->routeParser->parse($route);
-        $server = $options['server'] ?? 'rpc';
         foreach ($routeDatas as $routeData) {
-            // Use 'GET' method for RPC.
             $this->dataGenerator->addRoute('POST', $routeData, new Handler($handler, $route));
-            MiddlewareManager::addMiddlewares($server, $route, 'GET', $options['middleware'] ?? []);
         }
     }
 

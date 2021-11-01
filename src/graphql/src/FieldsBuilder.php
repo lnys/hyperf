@@ -5,11 +5,10 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace Hyperf\GraphQL;
 
 use GraphQL\Type\Definition\NonNull;
@@ -550,7 +549,7 @@ class FieldsBuilder
                 if (! $isNullable) {
                     $graphQlType = GraphQLType::nonNull($graphQlType);
                 }
-            } catch (TypeMappingException | CannotMapTypeExceptionInterface $e) {
+            } catch (TypeMappingException|CannotMapTypeExceptionInterface $e) {
                 // Is the type iterable? If yes, let's analyze the docblock
                 // TODO: it would be better not to go through an exception for this.
                 if ($type instanceof Object_) {
@@ -591,7 +590,7 @@ class FieldsBuilder
         foreach ($filteredDocBlockTypes as $singleDocBlockType) {
             try {
                 $unionTypes[] = $this->toGraphQlType($this->dropNullableType($singleDocBlockType), null, $mapToInputType);
-            } catch (TypeMappingException | CannotMapTypeExceptionInterface $e) {
+            } catch (TypeMappingException|CannotMapTypeExceptionInterface $e) {
                 // We have several types. It is ok not to be able to match one.
                 $lastException = $e;
             }
@@ -655,7 +654,7 @@ class FieldsBuilder
                 // TODO: add here a scan of the $type variable and do stuff if it is iterable.
                 // TODO: remove the iterator type if specified in the docblock (@return Iterator|User[])
                 // TODO: check there is at least one array (User[])
-            } catch (TypeMappingException | CannotMapTypeExceptionInterface $e) {
+            } catch (TypeMappingException|CannotMapTypeExceptionInterface $e) {
                 // We have several types. It is ok not to be able to match one.
                 $lastException = $e;
             }

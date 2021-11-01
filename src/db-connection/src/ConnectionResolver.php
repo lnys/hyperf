@@ -5,11 +5,10 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace Hyperf\DbConnection;
 
 use Hyperf\Database\ConnectionInterface;
@@ -72,7 +71,8 @@ class ConnectionResolver implements ConnectionResolverInterface
                 Context::set($id, $connection);
             } finally {
                 if (Coroutine::inCoroutine()) {
-                    defer(function () use ($connection) {
+                    defer(function () use ($connection, $id) {
+                        Context::set($id, null);
                         $connection->release();
                     });
                 }

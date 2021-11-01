@@ -5,16 +5,16 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace HyperfTest\HttpMessage;
 
 use Hyperf\HttpMessage\Server\Response;
 use Hyperf\HttpMessage\Stream\SwooleFileStream;
 use Hyperf\HttpMessage\Stream\SwooleStream;
+use Hyperf\HttpServer\ResponseEmitter;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 use Swoole\Http\Response as SwooleResponse;
@@ -30,12 +30,13 @@ class SwooleStreamTest extends TestCase
         $swooleResponse = Mockery::mock(SwooleResponse::class);
         $file = __FILE__;
         $swooleResponse->shouldReceive('sendfile')->with($file)->once()->andReturn(null);
-        $swooleResponse->shouldReceive('status')->with(Mockery::any())->once()->andReturn(200);
+        $swooleResponse->shouldReceive('status')->with(200, '')->once()->andReturn(200);
 
-        $response = new Response($swooleResponse);
+        $response = new Response();
         $response = $response->withBody(new SwooleFileStream($file));
 
-        $this->assertSame(null, $response->send());
+        $responseEmitter = new ResponseEmitter();
+        $this->assertSame(null, $responseEmitter->emit($response, $swooleResponse, true));
     }
 
     public function testSwooleStream()
@@ -43,13 +44,14 @@ class SwooleStreamTest extends TestCase
         $swooleResponse = Mockery::mock(SwooleResponse::class);
         $content = '{"id":1}';
         $swooleResponse->shouldReceive('end')->with($content)->once()->andReturn(null);
-        $swooleResponse->shouldReceive('status')->with(Mockery::any())->once()->andReturn(200);
+        $swooleResponse->shouldReceive('status')->with(200, '')->once()->andReturn(200);
         $swooleResponse->shouldReceive('header')->with('TOKEN', 'xxx')->once()->andReturn(null);
 
-        $response = new Response($swooleResponse);
+        $response = new Response();
         $response = $response->withBody(new SwooleStream($content))->withHeader('TOKEN', 'xxx');
 
-        $this->assertSame(null, $response->send());
+        $responseEmitter = new ResponseEmitter();
+        $this->assertSame(null, $responseEmitter->emit($response, $swooleResponse, true));
     }
 
     public function testClose()

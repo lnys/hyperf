@@ -5,18 +5,17 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace Hyperf\Guzzle;
 
 use GuzzleHttp\HandlerStack;
 use Hyperf\Di\Container;
 use Hyperf\Pool\SimplePool\PoolFactory;
 use Hyperf\Utils\ApplicationContext;
-use Swoole\Coroutine;
+use Hyperf\Utils\Coroutine;
 
 class HandlerStackFactory
 {
@@ -55,7 +54,7 @@ class HandlerStackFactory
         $option = array_merge($this->option, $option);
         $middlewares = array_merge($this->middlewares, $middlewares);
 
-        if (Coroutine::getCid() > 0) {
+        if (Coroutine::inCoroutine()) {
             $handler = $this->getHandler($option);
         }
 

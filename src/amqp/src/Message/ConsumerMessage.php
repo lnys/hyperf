@@ -5,16 +5,18 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace Hyperf\Amqp\Message;
 
 use Hyperf\Amqp\Builder\QueueBuilder;
 use Hyperf\Amqp\Packer\Packer;
+use Hyperf\Amqp\Result;
 use Hyperf\Utils\ApplicationContext;
+use PhpAmqpLib\Channel\AMQPChannel;
+use PhpAmqpLib\Message\AMQPMessage;
 use Psr\Container\ContainerInterface;
 
 abstract class ConsumerMessage extends Message implements ConsumerMessageInterface
@@ -42,12 +44,36 @@ abstract class ConsumerMessage extends Message implements ConsumerMessageInterfa
     /**
      * @var null|array
      */
-    protected $qos;
+    protected $qos = [
+        'prefetch_size' => 0,
+        'prefetch_count' => 1,
+        'global' => false,
+    ];
 
     /**
      * @var bool
      */
     protected $enable = true;
+
+    /**
+     * @var int
+     */
+    protected $maxConsumption = 0;
+
+    /**
+     * @var float|int
+     */
+    protected $waitTimeout = 0;
+
+    public function consumeMessage($data, AMQPMessage $message): string
+    {
+        return $this->consume($data);
+    }
+
+    public function consume($data): string
+    {
+        return Result::ACK;
+    }
 
     public function setQueue(string $queue): self
     {
@@ -85,7 +111,7 @@ abstract class ConsumerMessage extends Message implements ConsumerMessageInterfa
 
     public function getConsumerTag(): string
     {
-        return implode(',', (array) $this->getRoutingKey());
+        return '';
     }
 
     public function isEnable(): bool
@@ -97,5 +123,42 @@ abstract class ConsumerMessage extends Message implements ConsumerMessageInterfa
     {
         $this->enable = $enable;
         return $this;
+    }
+
+    public function getMaxConsumption(): int
+    {
+        return $this->maxConsumption;
+    }
+
+    public function setMaxConsumption(int $maxConsumption)
+    {
+        $this->maxConsumption = $maxConsumption;
+        return $this;
+    }
+
+    public function getWaitTimeout()
+    {
+        return $this->waitTimeout;
+    }
+
+    public function setWaitTimeout($timeout)
+    {
+        $this->waitTimeout = $timeout;
+        return $this;
+    }
+
+    protected function reply($data, AMQPMessage $message)
+    {
+        $packer = ApplicationContext::getContainer()->get(Packer::class);
+
+        /** @var AMQPChannel $channel */
+        $channel = $message->delivery_info['channel'];
+        $channel->basic_publish(
+            new AMQPMessage($packer->pack($data), [
+                'correlation_id' => $message->get('correlation_id'),
+            ]),
+            '',
+            $message->get('reply_to')
+        );
     }
 }

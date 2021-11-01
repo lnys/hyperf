@@ -5,11 +5,10 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace HyperfTest\Validation\Cases;
 
 use Hyperf\Database\Connection;
@@ -49,7 +48,7 @@ class ValidationExistsRuleTest extends TestCase
         $connector = new ConnectionFactory($container);
         $dbConfig = [
             'driver' => 'mysql',
-            'host' => 'localhost',
+            'host' => '127.0.0.1',
             'database' => 'hyperf',
             'username' => 'root',
             'password' => '',

@@ -5,17 +5,17 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace HyperfTest\JsonRpc;
 
 use Hyperf\Config\Config;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Contract\NormalizerInterface;
 use Hyperf\Contract\StdoutLoggerInterface;
+use Hyperf\Di\ClosureDefinitionCollectorInterface;
 use Hyperf\Di\Container;
 use Hyperf\Di\MethodDefinitionCollectorInterface;
 use Hyperf\ExceptionHandler\ExceptionHandlerDispatcher;
@@ -31,9 +31,9 @@ use Hyperf\Rpc\Context;
 use Hyperf\Rpc\ProtocolManager;
 use Hyperf\RpcServer\RequestDispatcher;
 use Hyperf\RpcServer\Router\DispatcherFactory;
+use Hyperf\Server\Event;
 use Hyperf\Server\Server;
 use Hyperf\Server\ServerManager;
-use Hyperf\Server\SwooleEvent;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Serializer\SimpleNormalizer;
@@ -128,7 +128,7 @@ class TcpServerTest extends TestCase
                         'port' => 9504,
                         'sock_type' => SWOOLE_SOCK_TCP,
                         'callbacks' => [
-                            SwooleEvent::ON_RECEIVE => [\Hyperf\JsonRpc\TcpServer::class, 'onReceive'],
+                            Event::ON_RECEIVE => [\Hyperf\JsonRpc\TcpServer::class, 'onReceive'],
                         ],
                         'settings' => [
                             'open_eof_split' => true,
@@ -165,6 +165,7 @@ class TcpServerTest extends TestCase
         $container->shouldReceive('get')->with(MethodDefinitionCollectorInterface::class)->andReturnUsing(function () {
             return Mockery::mock(MethodDefinitionCollectorInterface::class);
         });
+        $container->shouldReceive('get')->with(ClosureDefinitionCollectorInterface::class)->andReturn(null);
         return $container;
     }
 }

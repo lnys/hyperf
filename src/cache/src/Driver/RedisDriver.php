@@ -5,11 +5,10 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace Hyperf\Cache\Driver;
 
 use Hyperf\Cache\Exception\InvalidArgumentException;
@@ -114,7 +113,7 @@ class RedisDriver extends Driver implements KeyCollectorInterface
             return $this->getCacheKey($key);
         }, $keys);
 
-        return $this->redis->del(...$cacheKeys);
+        return (bool) $this->redis->del(...$cacheKeys);
     }
 
     public function has($key)

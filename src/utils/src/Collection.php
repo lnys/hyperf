@@ -5,11 +5,10 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace Hyperf\Utils;
 
 use ArrayAccess;
@@ -17,6 +16,7 @@ use ArrayIterator;
 use CachingIterator;
 use Countable;
 use Exception;
+use Hyperf\Macroable\Macroable;
 use Hyperf\Utils\Contracts\Arrayable;
 use Hyperf\Utils\Contracts\Jsonable;
 use IteratorAggregate;
@@ -51,6 +51,8 @@ use Traversable;
  */
 class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate, Jsonable, JsonSerializable
 {
+    use Macroable;
+
     /**
      * The items contained in the collection.
      *
@@ -114,6 +116,15 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
             throw new Exception("Property [{$key}] does not exist on this collection instance.");
         }
         return new HigherOrderCollectionProxy($this, $key);
+    }
+
+    /**
+     * @param mixed $items
+     */
+    public function fill($items = [])
+    {
+        $this->items = $this->getArrayableItems($items);
+        return $this;
     }
 
     /**
@@ -227,7 +238,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     public function mode($key = null)
     {
         if ($this->count() == 0) {
-            return;
+            return null;
         }
         $collection = isset($key) ? $this->pluck($key) : $this;
         $counts = new self();
@@ -299,7 +310,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     public function dd(...$args): void
     {
         call_user_func_array([$this, 'dump'], $args);
-        die(1);
+        exit(1);
     }
 
     /**
@@ -1112,7 +1123,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
             return new static();
         }
         $groups = new static();
-        $groupSize = floor($this->count() / $numberOfGroups);
+        $groupSize = (int) floor($this->count() / $numberOfGroups);
         $remain = $this->count() % $numberOfGroups;
         $start = 0;
         for ($i = 0; $i < $numberOfGroups; ++$i) {
@@ -1348,7 +1359,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
                 return $value->jsonSerialize();
             }
             if ($value instanceof Jsonable) {
-                return json_decode($value->toJson(), true);
+                return json_decode($value->__toString(), true);
             }
             if ($value instanceof Arrayable) {
                 return $value->toArray();
@@ -1535,7 +1546,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
             return $items->toArray();
         }
         if ($items instanceof Jsonable) {
-            return json_decode($items->toJson(), true);
+            return json_decode($items->__toString(), true);
         }
         if ($items instanceof JsonSerializable) {
             return $items->jsonSerialize();

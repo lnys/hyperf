@@ -5,11 +5,10 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace Hyperf\Database\Model;
 
 use Hyperf\Contract\CompressInterface;
@@ -18,12 +17,9 @@ use Hyperf\Utils\Arr;
 use Hyperf\Utils\Collection as BaseCollection;
 use Hyperf\Utils\Contracts\Arrayable;
 use Hyperf\Utils\Str;
-use Hyperf\Utils\Traits\Macroable;
 
 class Collection extends BaseCollection implements CompressInterface
 {
-    use Macroable;
-
     /**
      * Find a model in the collection by key.
      *
@@ -341,6 +337,38 @@ class Collection extends BaseCollection implements CompressInterface
         $dictionary = Arr::only($this->getDictionary(), $keys);
 
         return new static(array_values($dictionary));
+    }
+
+    /**
+     * Returns only the columns from the collection with the specified keys.
+     *
+     * @param null|array|string $keys
+     */
+    public function columns($keys): BaseCollection
+    {
+        if (is_null($keys)) {
+            return new BaseCollection([]);
+        }
+        $result = [];
+        $isSingleColumn = is_string($keys);
+        foreach ($this->items as $item) {
+            if ($isSingleColumn) {
+                $value = $item->{$keys} ?? null;
+                $result[] = $value instanceof Arrayable ? $value->toArray() : $value;
+            } else {
+                $result[] = value(static function () use ($item, $keys) {
+                    $res = [];
+                    foreach ($keys as $key) {
+                        $value = $item->{$key} ?? null;
+                        $res[$key] = $value instanceof Arrayable ? $value->toArray() : $value;
+                    }
+
+                    return $res;
+                });
+            }
+        }
+
+        return new BaseCollection($result);
     }
 
     /**

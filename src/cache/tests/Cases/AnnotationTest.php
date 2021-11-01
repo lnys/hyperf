@@ -5,11 +5,10 @@ declare(strict_types=1);
  * This file is part of Hyperf.
  *
  * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
+ * @document https://hyperf.wiki
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace HyperfTest\Cache\Cases;
 
 use Hyperf\Cache\Annotation\Cacheable;
@@ -53,6 +52,22 @@ class AnnotationTest extends TestCase
         $this->assertSame('test', $annotation->prefix);
         $this->assertSame(3600, $annotation->ttl);
         $this->assertSame(100, $annotation->offset);
+
+        $annotation = new Cacheable([
+            'prefix' => 'test',
+            'ttl' => null,
+        ]);
+
+        $this->assertSame('test', $annotation->prefix);
+        $this->assertSame(null, $annotation->ttl);
+
+        $annotation = new CachePut([
+            'prefix' => 'test',
+            'ttl' => null,
+        ]);
+
+        $this->assertSame('test', $annotation->prefix);
+        $this->assertSame(null, $annotation->ttl);
     }
 
     public function testAnnotationManager()
